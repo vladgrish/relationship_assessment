@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Relationship Assessment</title>
+	<style>
+		* {
+			box-sizing: border-box;
+			margin: 0;
+			padding: 0;
+		}
+
+		body {
+			background-color: #e0b0e8;
+			font-family: 'Montserrat', sans-serif;
+			color: #333;
+			font-size: 1.2rem;
+			line-height: 1.5;
+		}
+
+		h1 {
+			font-size: 3rem;
+			font-weight: bold;
+			text-align: center;
+			margin: 2rem 0;
+			color: #d20d52;
+			text-transform: uppercase;
+		}
+
+		main {
+			max-width: 800px;
+			margin: 0 auto;
+			padding: 2rem;
+			background-color: rgb(235, 201, 242);
+			border-radius: 10px;
+			box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+		}
+
+		.topic {
+			font-weight: bold;
+			margin-top: 2rem;
+			margin-bottom: 1rem;
+			color: #d65e88;
+			text-transform: uppercase;
+		}
+
+		.question {
+			margin-bottom: 1.5rem;
+		}
+
+		.question-text {
+			font-size: 1.2rem;
+			font-weight: bold;
+			margin-bottom: 1rem;
+		}
+
+		.rating-bar {
+			display: flex;
+			margin-bottom: 1rem;
+		}
+
+		.bar {
+			flex: 1;
+			height: 20px;
+			background-color: #ddd;
+			margin-right: 1rem;
+			border-radius: 5px;
+		}
+
+		.bar-1 {
+			background-color: #b22222;
+		}
+
+		.bar-2 {
+			background-color: #ff6347;
+		}
+
+		.bar-3 {
+			background-color: #f5b041;
+		}
+
+		.bar-4 {
+			background-color: #2ecc71;
+		}
+
+		.bar-5 {
+			background-color: #2ecc71;
+		}
+
+		.rating-inputs {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			font-size: 1.2rem;
+			font-weight: bold;
+			color: #d65e88;
+			text-transform: uppercase;
+		}
+
+		.rating-inputs label {
+			flex: 1;
+			text-align: center;
+			margin-right: 0.5rem;
+			cursor: pointer;
+            transition: color 0.3s ease-in-out, transform 0.3s ease-in-out;
+		}
+
+		.rating-inputs label:hover, 
+.rating-inputs input[type="radio"]:checked + label {
+	color: #b22222;
+    transform: scale(2);
+}
+
+.rating-inputs input[type="radio"]:checked + label {
+	font-size: 1.5rem;
+	font-weight: bold;
+}
+
+.rating-inputs input[type="radio"]:checked + label .bar-1,
+.rating-inputs input[type="radio"]:checked + label .bar-2,
+.rating-inputs input[type="radio"]:checked + label .bar-3,
+.rating-inputs input[type="radio"]:checked + label .bar-4,
+.rating-inputs input[type="radio"]:checked + label .bar-5 {
+	background-color: #d65e88;
+}
+	button[type="button"] {
+		display: block;
+		margin: 2rem auto;
+		background-color: #d65e88;
+		color: #fff;
+		font-size: 1.2rem;
+		font-weight: bold;
+		padding: 1rem 2rem;
+		border: none;
+		border-radius: 5px;
+		cursor: pointer;
+		transition: background-color 0.3s ease-in-out;
+	}
+
+	button[type="button"]:hover {
+		background-color: #b22222;
+	}
+
+	#results {
+		display: none;
+		margin-top: 2rem;
+		background-color: #fff;
+		border-radius: 10px;
+		box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+	}
+
+	table {
+		width: 100%;
+		border-collapse: collapse;
+	}
+
+	th,
+	td {
+		padding: 1rem;
+		text-align: center;
+		border-bottom: 1px solid #ddd;
+	}
+
+	th {
+		background-color: #d65e88;
+		color: #fff;
+		text-transform: uppercase;
+		font-weight: bold;
+		font-size: 1.2rem;
+		padding-top: 1rem;
+		padding-bottom: 1rem;
+	}
+
+	td.score {
+		font-weight: bold;
+		font-size: 1.2rem;
+		color: #fff;
+		border-radius: 5px;
+		padding: 0.5rem;
+		margin: 0 auto;
+		display: inline-block;
+		min-width: 3rem;
+		text-align: center;
+		text-transform: uppercase;
+	}
+
+	td.red {
+		background-color: #b22222;
+	}
+
+	td.orange {
+		background-color: #ff6347;
+	}
+
+	td.yellow {
+		background-color: #f5b041;
+	}
+
+	td.green {
+		background-color: #2ecc71;
+	}
+    .rating-inputs input[type="radio"]:checked + label {
+  box-shadow: 0px 0px 5px rgba(214, 94, 136, 0.8);
+}
+.rating-inputs input[type="radio"]:checked + label {
+  font-weight: bold;
+  color: #d65e88;
+}
+</style>
+</head>
+<body>
+	<header>
+		<h1>Relationship Assessment</h1>
+	</header>
+	<main>
+		<form id="assessmentForm">
+			<div id="questionsContainer"></div>
+			<button type="button" onclick="calculateResults()">Submit</button>
+		</form>
+		<div id="results">
+			<h2>Results</h2>
+			<table>
+				<thead>
+					<tr>
+						<th>Topic</th>
+						<th>Average Score</th>
+					</tr>
+				</thead>
+				<tbody id="resultsContainer"></tbody>
+			</table>
+		</div>
+	</main>
+    <script>
+        const questions = [
+	{ topic: "Communication", text: "We can discuss our thoughts and feelings openly without fear of judgment or criticism." },
+	{ topic: "Communication", text: "We actively listen to each other and try to understand each other's perspectives." },
+	{ topic: "Communication", text: "We are comfortable discussing difficult topics and sharing our vulnerabilities." },
+	{ topic: "Communication", text: "We make time to talk to each other every day, even if it's just for a few minutes." },
+	{ topic: "Communication", text: "We are able to resolve conflicts without resorting to yelling or name-calling." },
+	{ topic: "Communication", text: "We check in with each other regularly to see how the other is doing." },
+	{ topic: "Trust", text: "We trust each other and do not keep secrets or hide things from each other." },
+	{ topic: "Trust", text: "We are honest with each other even when it is difficult or uncomfortable." },
+	{ topic: "Trust", text: "We keep our promises and commitments to each other." },
+	{ topic: "Trust", text: "We do not share personal or private information about each other without consent." },
+	{ topic: "Trust", text: "We are able to forgive each other when trust has been broken." },
+	{ topic: "Trust", text: "We are transparent with each other about our finances and spending habits." },
+	{ topic: "Respect", text: "We respect each other's opinions, even when we disagree." },
+	{ topic: "Respect", text: "We support each other's goals and aspirations, even if they are different from our own." },
+	{ topic: "Respect", text: "We do not criticize or belittle each other, even in times of conflict." },
+	{ topic: "Respect", text: "We respect each other's boundaries and do not pressure each other to do things we are not comfortable with." },
+	{ topic: "Respect", text: "We make an effort to understand and appreciate each other's cultural background and heritage." },
+	{ topic: "Respect", text: "We prioritize spending quality time together, even if it means sacrificing other activities." },
+	{ topic: "Intimacy", text: "We have a satisfying and fulfilling sex life." },
+	{ topic: "Intimacy", text: "We are affectionate and show physical intimacy regularly." },
+	{ topic: "Intimacy", text: "We are comfortable being vulnerable with each other during intimate moments." },
+	{ topic: "Intimacy", text: "We make an effort to keep the romance alive by planning date nights and special activities." },
+	{ topic: "Intimacy", text: "We are able to communicate our sexual needs and desires to each other." },
+	{ topic: "Intimacy", text: "We prioritize taking care of our physical health and well-being in order to improve our intimacy." }
+];
+            function renderQuestions() {
+		const questionsContainer = document.getElementById("questionsContainer");
+		let currentTopic = "";
+
+		questions.forEach((question, index) => {
+			if (question.topic !== currentTopic) {
+				currentTopic = question.topic;
+				const topicElement = document.createElement("div");
+				topicElement.className = "topic";
+				topicElement.innerText = currentTopic;
+				questionsContainer.appendChild(topicElement);
+			}
+
+			const questionElement = document.createElement("div");
+			questionElement.className = "question";
+			questionElement.innerHTML = `
+				<div class="question-text">${question.text}</div>
+				<div class="rating-bar">
+					<div class="bar bar-1"></div>
+					<div class="bar bar-2"></div>
+					<div class="bar bar-3"></div>
+					<div class="bar bar-4"></div>
+					<div class="bar bar-5"></div>
+				</div>
+				<div class="rating-inputs">
+					<label for="question${index}-1">
+						<input type="radio" id="question${index}-1" name="question${index}" value="1">
+						1
+					</label>
+					<label for="question${index}-2">
+						<input type="radio" id="question${index}-2" name="question${index}" value="2">
+						2
+					</label>
+					<label for="question${index}-3">
+						<input type="radio" id="question${index}-3" name="question${index}" value="3">
+						3
+					</label>
+					<label for="question${index}-4">
+						<input type="radio" id="question${index}-4" name="question${index}" value="4">
+						4
+					</label>
+					<label for="question${index}-5">
+						<input type="radio" id="question${index}-5" name="question${index}" value="5">
+						5
+					</label>
+				</div>
+			`;
+			questionsContainer.appendChild(questionElement);
+		});
+	}
+
+	function calculateResults() {
+		let topicScores = {};
+		let totalScore = 0;
+		let answeredQuestions = 0;
+
+		questions.forEach((_, index) => {
+			const questionInputs = document.getElementsByName(`question${index}`);
+			let value = null;
+
+			for (let i = 0; i < questionInputs.length; i++) {
+				if (questionInputs[i].checked) {
+					value = parseInt(questionInputs[i].value, 10);
+					break;
+				}
+			}
+
+			if (
+                !isNaN(value)) {
+totalScore += value;
+answeredQuestions++;
+
+if (!topicScores.hasOwnProperty(questions[index].topic)) {
+					topicScores[questions[index].topic] = { score: 0, count: 0 };
+				}
+
+				topicScores[questions[index].topic].score += value;
+				topicScores[questions[index].topic].count++;
+			}
+		});
+
+		if (answeredQuestions !== questions.length) {
+			alert("Please answer all questions.");
+			return;
+		}
+
+		const averageScore = totalScore / questions.length;
+		const resultsContainer = document.getElementById("resultsContainer");
+		resultsContainer.innerHTML = "";
+
+		for (let topic in topicScores) {
+			if (topicScores.hasOwnProperty(topic)) {
+				const topicAverage = topicScores[topic].score / topicScores[topic].count;
+				const topicRow = `
+					<tr>
+						<td>${topic}</td>
+						<td class="score ${getScoreClass(topicAverage)}">${topicAverage.toFixed(2)}</td>
+					</tr>
+				`;
+				resultsContainer.innerHTML += topicRow;
+			}
+		}
+
+		const overallScoreElement = document.createElement("p");
+		overallScoreElement.innerHTML = `Your average score is: <span class="score ${getScoreClass(averageScore)}">${averageScore.toFixed(2)}</span>`;
+		resultsContainer.insertBefore(overallScoreElement, resultsContainer.firstChild);
+
+		document.getElementById("results").style.display = "block";
+	}
+
+	function getScoreClass(score) {
+		if (score < 2) {
+			return "red";
+		} else if (score < 3) {
+			return "orange";
+		} else if (score < 4) {
+			return "yellow";
+		} else {
+			return "green";
+		}
+	}
+
+	renderQuestions();
+</script>
+</body>
+</html>
